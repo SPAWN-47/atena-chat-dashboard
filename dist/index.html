@@ -153,6 +153,22 @@
                 'RETORNO': 'bg-amber-50 text-amber-700 border-amber-200',
             };
 
+            const handleWhatsApp = (e) => {
+                e.stopPropagation();
+                const phone = lead.phone || '5511999999999'; // Número padrão se não tiver
+                const message = lead.procedure
+                    ? `Olá ${lead.name}! Vi que você tem interesse em ${lead.procedure}. Como posso te ajudar?`
+                    : `Olá ${lead.name}! Como posso te ajudar?`;
+                const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            };
+
+            const handlePhone = (e) => {
+                e.stopPropagation();
+                const phone = lead.phone || '11999999999';
+                window.location.href = `tel:${phone}`;
+            };
+
             return (
                 <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer">
                     <div className="flex items-start justify-between mb-3">
@@ -188,11 +204,17 @@
                     )}
 
                     <div className="flex gap-2 pt-2 border-t border-slate-100">
-                        <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors">
+                        <button
+                            onClick={handleWhatsApp}
+                            className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors"
+                        >
                             <Icon type="whatsapp" size={14} />
                             WhatsApp
                         </button>
-                        <button className="bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-colors">
+                        <button
+                            onClick={handlePhone}
+                            className="bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-colors"
+                        >
                             <Icon type="phone" size={14} />
                         </button>
                     </div>
@@ -200,19 +222,31 @@
             );
         };
 
-        const KanbanColumn = ({ title, count, color, leads, onOpenDetails }) => {
+        const KanbanColumn = ({ title, count, color, leads, onOpenDetails, onDelete, isCustom }) => {
             const colorClasses = {
                 blue: 'bg-blue-50 text-blue-700 border-blue-100',
                 amber: 'bg-amber-50 text-amber-700 border-amber-100',
                 green: 'bg-green-50 text-green-700 border-green-100',
                 purple: 'bg-purple-50 text-purple-700 border-purple-100',
+                slate: 'bg-slate-50 text-slate-700 border-slate-200',
             };
 
             return (
-                <div className="flex-shrink-0 w-80">
-                    <div className={`flex items-center justify-between px-4 py-3 rounded-lg border mb-4 ${colorClasses[color]}`}>
-                        <span className="font-bold text-sm">{title}</span>
-                        <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">{count}</span>
+                <div className="flex-shrink-0 w-80 group/column">
+                    <div className={`flex items-center justify-between px-4 py-3 rounded-lg border mb-4 ${colorClasses[color] || colorClasses.slate}`}>
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm">{title}</span>
+                            <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">{count}</span>
+                        </div>
+                        {isCustom && onDelete && (
+                            <button
+                                onClick={onDelete}
+                                className="opacity-0 group-hover/column:opacity-100 text-red-500 hover:text-red-700 transition-opacity p-1"
+                                title="Excluir coluna"
+                            >
+                                <Icon type="x" size={16} />
+                            </button>
+                        )}
                     </div>
                     <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar pr-2">
                         {leads.map(lead => (
@@ -376,6 +410,16 @@
         const CRM = () => {
             const [leads, setLeads] = useState(initialLeads);
             const [selectedLead, setSelectedLead] = useState(null);
+            const [customColumns, setCustomColumns] = useState([]);
+
+            const defaultColumns = [
+                { id: 'novos', title: 'Novos Leads', color: 'blue', isCustom: false },
+                { id: 'conversa', title: 'Em Conversa', color: 'amber', isCustom: false },
+                { id: 'agendados', title: 'Agendados', color: 'green', isCustom: false },
+                { id: 'tratamento', title: 'Tratamento', color: 'purple', isCustom: false },
+            ];
+
+            const allColumns = [...defaultColumns, ...customColumns];
 
             const handleCreateNewLead = () => {
                 setSelectedLead({
@@ -391,7 +435,6 @@
 
             const handleSaveLead = (updatedLead) => {
                 if (!updatedLead.id) {
-                    // Criar novo lead
                     const newLead = {
                         ...updatedLead,
                         id: Date.now(),
@@ -401,30 +444,28 @@
                         ...prev,
                         novos: [...prev.novos, newLead]
                     }));
-                    alert('Lead criado com sucesso!');
+                    alert('✅ Lead criado com sucesso!');
                 } else {
-                    // Atualizar lead existente
                     const updateLeadsInColumn = (column) =>
                         column.map(lead => lead.id === updatedLead.id ? updatedLead : lead);
 
-                    setLeads(prev => ({
-                        novos: updateLeadsInColumn(prev.novos),
-                        conversa: updateLeadsInColumn(prev.conversa),
-                        agendados: updateLeadsInColumn(prev.agendados),
-                        tratamento: updateLeadsInColumn(prev.tratamento)
-                    }));
-                    alert('Lead atualizado com sucesso!');
+                    const updatedLeads = { ...leads };
+                    Object.keys(updatedLeads).forEach(key => {
+                        updatedLeads[key] = updateLeadsInColumn(updatedLeads[key]);
+                    });
+                    setLeads(updatedLeads);
+                    alert('✅ Lead atualizado com sucesso!');
                 }
             };
 
             const handleImport = () => {
-                alert('Funcionalidade de Importação em desenvolvimento.\nEm breve você poderá importar leads via CSV/Excel!');
+                alert('📥 Funcionalidade de Importação em desenvolvimento.\n\nEm breve você poderá importar leads via CSV/Excel!');
             };
 
             const handleExport = () => {
-                const allLeads = [...leads.novos, ...leads.conversa, ...leads.agendados, ...leads.tratamento];
-                const csvContent = `Nome,Origem,Procedimento,Valor,Status\n${allLeads.map(l =>
-                    `${l.name},${l.source},${l.procedure},${l.value},Ativo`
+                const allLeadsArray = Object.values(leads).flat();
+                const csvContent = `Nome,Origem,Procedimento,Valor,Status\n${allLeadsArray.map(l =>
+                    `${l.name},${l.source},${l.procedure || ''},${l.value || ''},Ativo`
                 ).join('\n')}`;
 
                 const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -433,13 +474,33 @@
                 a.href = url;
                 a.download = `leads-${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
-                alert('Leads exportados com sucesso!');
+                alert('✅ Leads exportados com sucesso!');
             };
 
             const handleAddColumn = () => {
                 const columnName = prompt('Digite o nome da nova coluna:');
-                if (columnName) {
-                    alert(`Funcionalidade em desenvolvimento.\nNova coluna "${columnName}" será adicionada em breve!`);
+                if (columnName && columnName.trim()) {
+                    const columnId = `custom_${Date.now()}`;
+                    const newColumn = {
+                        id: columnId,
+                        title: columnName.trim(),
+                        color: 'slate',
+                        isCustom: true
+                    };
+                    setCustomColumns(prev => [...prev, newColumn]);
+                    setLeads(prev => ({ ...prev, [columnId]: [] }));
+                    alert(`✅ Coluna "${columnName}" criada com sucesso!`);
+                }
+            };
+
+            const handleDeleteColumn = (columnId) => {
+                const column = customColumns.find(col => col.id === columnId);
+                if (column && confirm(`Tem certeza que deseja excluir a coluna "${column.title}"?\n\nTodos os leads desta coluna serão perdidos!`)) {
+                    setCustomColumns(prev => prev.filter(col => col.id !== columnId));
+                    const newLeads = { ...leads };
+                    delete newLeads[columnId];
+                    setLeads(newLeads);
+                    alert('✅ Coluna excluída com sucesso!');
                 }
             };
 
@@ -472,34 +533,18 @@
                     </div>
 
                     <div className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar">
-                        <KanbanColumn
-                            title="Novos Leads"
-                            count={leads.novos.length}
-                            color="blue"
-                            leads={leads.novos}
-                            onOpenDetails={setSelectedLead}
-                        />
-                        <KanbanColumn
-                            title="Em Conversa"
-                            count={leads.conversa.length}
-                            color="amber"
-                            leads={leads.conversa}
-                            onOpenDetails={setSelectedLead}
-                        />
-                        <KanbanColumn
-                            title="Agendados"
-                            count={leads.agendados.length}
-                            color="green"
-                            leads={leads.agendados}
-                            onOpenDetails={setSelectedLead}
-                        />
-                        <KanbanColumn
-                            title="Tratamento"
-                            count={leads.tratamento.length}
-                            color="purple"
-                            leads={leads.tratamento}
-                            onOpenDetails={setSelectedLead}
-                        />
+                        {allColumns.map(column => (
+                            <KanbanColumn
+                                key={column.id}
+                                title={column.title}
+                                count={leads[column.id]?.length || 0}
+                                color={column.color}
+                                leads={leads[column.id] || []}
+                                onOpenDetails={setSelectedLead}
+                                onDelete={column.isCustom ? () => handleDeleteColumn(column.id) : null}
+                                isCustom={column.isCustom}
+                            />
+                        ))}
                     </div>
 
                     <LeadDetailsModal lead={selectedLead} onClose={() => setSelectedLead(null)} onSave={handleSaveLead} />
