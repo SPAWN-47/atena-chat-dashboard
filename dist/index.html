@@ -12,9 +12,9 @@
         .c-fade-in { animation: fadeIn 0.3s ease-out; }
         .c-scale-in { animation: scaleIn 0.2s ease-out; }
         .c-slide-in-right { animation: slideInRight 0.3s ease-out; }
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
     </style>
 </head>
@@ -27,46 +27,41 @@
 
     <script type="text/babel">
         const { useState } = React;
-        const e = React.createElement;
 
-        // Componente de Ícone SVG Inline
-        const Icon = ({ type, size = 24, className = "" }) => {
+        // ===== ICONS =====
+        const Icon = ({ type, size = 20, className = "" }) => {
             const icons = {
                 grid: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>,
-
                 kanban: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 5v11"/><path d="M12 5v6"/><path d="M18 5v14"/></svg>,
-
                 calendar: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>,
-
                 message: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-
                 users: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-
-                brain: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>,
-
+                brain: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>,
                 book: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>,
-
                 settings: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
-
                 logout: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>,
-
                 menu: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
-
                 chevronLeft: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6"/></svg>,
-
                 bell: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>,
-
                 messageSquare: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-
                 trendingUp: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
-
                 stethoscope: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>,
-
                 refresh: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>,
+                upload: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>,
+                download: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
+                plus: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+                userPlus: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>,
+                moreVertical: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>,
+                clock: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+                phone: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+                whatsapp: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 21 1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a0 0 0 0 0 0 0"/><path d="M14 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a0 0 0 0 0 0 0"/></svg>,
+                x: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+                dollarSign: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
             };
             return icons[type] || icons.grid;
         };
 
+        // ===== DASHBOARD COMPONENTS =====
         const DashboardStatCard = ({ title, value, icon, iconBgColor, textColor }) => (
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
                 <div>
@@ -129,6 +124,271 @@
             </div>
         );
 
+        // ===== CRM COMPONENTS =====
+        const initialLeads = {
+            novos: [
+                { id: 1, name: 'Mariana Santos', source: 'INSTAGRAM', time: '10 min', procedure: '', value: '' },
+                { id: 2, name: 'João Silva', source: 'SITE', time: '45 min', procedure: '', value: '' },
+                { id: 3, name: 'Pedro Costa', source: 'INDICAÇÃO', time: '2h', procedure: '', value: '' },
+            ],
+            conversa: [
+                { id: 4, name: 'Ana Clara', source: 'WHATSAPP', time: 'Aguardando resposta', procedure: 'Clareamento', value: '' },
+                { id: 5, name: 'Roberto Dias', source: 'INSTAGRAM', time: 'Em atendimento', procedure: '', value: '' },
+            ],
+            agendados: [
+                { id: 6, name: 'Júlia Mota', source: 'RETORNO', time: 'Amanhã, 14:00', procedure: 'Limpeza', value: '300' },
+                { id: 7, name: 'Marcos V.', source: 'SITE', time: 'Sexta, 09:00', procedure: 'Avaliação', value: '' },
+            ],
+            tratamento: [
+                { id: 8, name: 'Felipe Neto', source: 'INDICAÇÃO', time: 'Invisalign', procedure: 'Ortodontia', value: '12.000' },
+            ],
+        };
+
+        const LeadCard = ({ lead, onOpenDetails }) => {
+            const sourceColors = {
+                'INSTAGRAM': 'bg-pink-50 text-pink-700 border-pink-200',
+                'WHATSAPP': 'bg-green-50 text-green-700 border-green-200',
+                'SITE': 'bg-blue-50 text-blue-700 border-blue-200',
+                'INDICAÇÃO': 'bg-purple-50 text-purple-700 border-purple-200',
+                'RETORNO': 'bg-amber-50 text-amber-700 border-amber-200',
+            };
+
+            return (
+                <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="flex items-start justify-between mb-3">
+                        <span className={`text-xs font-bold px-2 py-1 rounded border ${sourceColors[lead.source]}`}>
+                            {lead.source}
+                        </span>
+                        <button className="text-slate-400 hover:text-slate-600" onClick={(e) => { e.stopPropagation(); onOpenDetails(lead); }}>
+                            <Icon type="moreVertical" size={16} />
+                        </button>
+                    </div>
+
+                    <h3 className="font-bold text-slate-900 text-base mb-1">{lead.name}</h3>
+                    <p className="text-xs text-slate-500 flex items-center gap-1 mb-3">
+                        <Icon type="clock" size={12} />
+                        {lead.time}
+                    </p>
+
+                    {(lead.procedure || lead.value) && (
+                        <div className="bg-slate-50 rounded-lg p-2 mb-3 space-y-1">
+                            {lead.procedure && (
+                                <div className="text-xs text-slate-700 flex items-center gap-1">
+                                    <Icon type="stethoscope" size={12} />
+                                    {lead.procedure}
+                                </div>
+                            )}
+                            {lead.value && (
+                                <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                    <Icon type="dollarSign" size={12} />
+                                    R$ {lead.value}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="flex gap-2 pt-2 border-t border-slate-100">
+                        <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors">
+                            <Icon type="whatsapp" size={14} />
+                            WhatsApp
+                        </button>
+                        <button className="bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-colors">
+                            <Icon type="phone" size={14} />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const KanbanColumn = ({ title, count, color, leads, onOpenDetails }) => {
+            const colorClasses = {
+                blue: 'bg-blue-50 text-blue-700 border-blue-100',
+                amber: 'bg-amber-50 text-amber-700 border-amber-100',
+                green: 'bg-green-50 text-green-700 border-green-100',
+                purple: 'bg-purple-50 text-purple-700 border-purple-100',
+            };
+
+            return (
+                <div className="flex-shrink-0 w-80">
+                    <div className={`flex items-center justify-between px-4 py-3 rounded-lg border mb-4 ${colorClasses[color]}`}>
+                        <span className="font-bold text-sm">{title}</span>
+                        <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">{count}</span>
+                    </div>
+                    <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar pr-2">
+                        {leads.map(lead => (
+                            <LeadCard key={lead.id} lead={lead} onOpenDetails={onOpenDetails} />
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const LeadDetailsModal = ({ lead, onClose }) => {
+            if (!lead) return null;
+
+            const getInitial = (name) => name.charAt(0).toUpperCase();
+
+            return (
+                <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-end c-fade-in">
+                    <div className="bg-white w-full max-w-lg h-full shadow-2xl c-slide-in-right overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex justify-between items-start">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-900">Detalhes do Lead</h2>
+                                <p className="text-xs text-slate-500 mt-1">ID: {lead.id.toString().padStart(8, '0')}</p>
+                            </div>
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+                                <Icon type="x" size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-xl">
+                                    {getInitial(lead.name)}
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-lg text-slate-900">{lead.name}</h3>
+                                    <p className="text-sm text-slate-600">{lead.source} • {lead.time}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Procedimento</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                        <Icon type="stethoscope" size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Ex: Implante..."
+                                        defaultValue={lead.procedure}
+                                        className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Valor (R$)</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                            <Icon type="dollarSign" size={18} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="0,00"
+                                            defaultValue={lead.value}
+                                            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Agendamento</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                            <Icon type="calendar" size={18} />
+                                        </div>
+                                        <input
+                                            type="date"
+                                            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Anotações</label>
+                                <textarea
+                                    rows={5}
+                                    placeholder="Detalhes..."
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-4 flex gap-3">
+                            <button onClick={onClose} className="flex-1 px-6 py-3 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-100 transition-colors">
+                                Cancelar
+                            </button>
+                            <button className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors">
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const CRM = () => {
+            const [leads, setLeads] = useState(initialLeads);
+            const [selectedLead, setSelectedLead] = useState(null);
+
+            return (
+                <div className="c-fade-in pb-20 md:pb-0">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900">CRM - Kanban de Vendas</h1>
+                            <p className="text-slate-600 mt-1">Gerencie seu funil de pacientes de forma visual.</p>
+                        </div>
+
+                        <div className="flex gap-2 flex-wrap">
+                            <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
+                                <Icon type="upload" size={16} />
+                                Importar
+                            </button>
+                            <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
+                                <Icon type="download" size={16} />
+                                Exportar
+                            </button>
+                            <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
+                                <Icon type="plus" size={16} />
+                                Coluna
+                            </button>
+                            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm text-sm">
+                                <Icon type="userPlus" size={16} />
+                                Novo Lead
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar">
+                        <KanbanColumn
+                            title="Novos Leads"
+                            count={leads.novos.length}
+                            color="blue"
+                            leads={leads.novos}
+                            onOpenDetails={setSelectedLead}
+                        />
+                        <KanbanColumn
+                            title="Em Conversa"
+                            count={leads.conversa.length}
+                            color="amber"
+                            leads={leads.conversa}
+                            onOpenDetails={setSelectedLead}
+                        />
+                        <KanbanColumn
+                            title="Agendados"
+                            count={leads.agendados.length}
+                            color="green"
+                            leads={leads.agendados}
+                            onOpenDetails={setSelectedLead}
+                        />
+                        <KanbanColumn
+                            title="Tratamento"
+                            count={leads.tratamento.length}
+                            color="purple"
+                            leads={leads.tratamento}
+                            onOpenDetails={setSelectedLead}
+                        />
+                    </div>
+
+                    <LeadDetailsModal lead={selectedLead} onClose={() => setSelectedLead(null)} />
+                </div>
+            );
+        };
+
+        // ===== PLACEHOLDER PAGES =====
         const PlaceholderPage = ({ title, icon, color }) => (
             <div className="c-fade-in pb-20 md:pb-0">
                 <h1 className="text-3xl font-bold text-slate-900 mb-6">{title}</h1>
@@ -140,17 +400,19 @@
             </div>
         );
 
+        // ===== MENU ITEMS =====
         const menuItems = [
             { id: 'dashboard', label: 'Dashboard', icon: 'grid', component: Overview },
-            { id: 'crm', label: 'CRM', icon: 'kanban', component: () => <PlaceholderPage title="CRM - Kanban de Vendas" icon="kanban" color="text-blue-600" /> },
+            { id: 'crm', label: 'CRM', icon: 'kanban', component: CRM },
             { id: 'agenda', label: 'Agenda', icon: 'calendar', component: () => <PlaceholderPage title="Agenda" icon="calendar" color="text-green-600" /> },
-            { id: 'scripts', label: 'Scripts', icon: 'message', component: () => <PlaceholderPage title="Scripts & Playbook" icon="message" color="text-purple-600" /> },
-            { id: 'patients', label: 'Pacientes', icon: 'users', component: () => <PlaceholderPage title="Pacientes" icon="users" color="text-indigo-600" /> },
+            { id: 'scripts', label: 'Scripts', icon: 'message', component: () => <PlaceholderPage title="Scripts" icon="message" color="text-purple-600" /> },
+            { id: 'pacientes', label: 'Pacientes', icon: 'users', component: () => <PlaceholderPage title="Pacientes" icon="users" color="text-indigo-600" /> },
             { id: 'ai-config', label: 'Base de Conhecimento', icon: 'brain', component: () => <PlaceholderPage title="Base de Conhecimento" icon="brain" color="text-pink-600" /> },
             { id: 'help', label: 'Ajuda & Tutoriais', icon: 'book', component: () => <PlaceholderPage title="Ajuda & Tutoriais" icon="book" color="text-amber-600" /> },
             { id: 'my-clinic', label: 'Minha Clínica', icon: 'settings', component: () => <PlaceholderPage title="Minha Clínica" icon="settings" color="text-slate-600" /> },
         ];
 
+        // ===== MAIN DASHBOARD LAYOUT =====
         function DashboardLayout() {
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [activeItem, setActiveItem] = useState('dashboard');
@@ -227,7 +489,7 @@
                         </header>
 
                         <main className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8 scroll-smooth">
-                            <div className="max-w-6xl mx-auto h-full">
+                            <div className="max-w-7xl mx-auto h-full">
                                 <ActiveComponent />
                             </div>
                         </main>
