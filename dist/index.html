@@ -636,6 +636,294 @@
             );
         };
 
+        // ===== AGENDA COMPONENTS =====
+        const HORARIOS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+        const DIAS_SEMANA = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
+
+        const AgendamentoModal = ({ agendamento, onClose, onSave }) => {
+            const [formData, setFormData] = React.useState({
+                paciente: agendamento?.paciente || '',
+                procedimento: agendamento?.procedimento || '',
+                data: agendamento?.data || '',
+                hora: agendamento?.hora || '',
+                status: agendamento?.status || 'pendente'
+            });
+
+            const handleSave = () => {
+                if (!formData.paciente.trim()) {
+                    alert('Por favor, preencha o nome do paciente!');
+                    return;
+                }
+                onSave({ ...agendamento, ...formData });
+                onClose();
+            };
+
+            return (
+                <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center c-fade-in">
+                    <div className="bg-white w-full max-w-md rounded-xl shadow-2xl c-scale-in">
+                        <div className="p-6 border-b border-slate-200 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-slate-900">
+                                {agendamento?.id ? 'Editar Agendamento' : 'Novo Agendamento'}
+                            </h2>
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+                                <Icon type="x" size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Paciente</label>
+                                <input
+                                    type="text"
+                                    value={formData.paciente}
+                                    onChange={(e) => setFormData({...formData, paciente: e.target.value})}
+                                    placeholder="Nome do paciente"
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Procedimento</label>
+                                <input
+                                    type="text"
+                                    value={formData.procedimento}
+                                    onChange={(e) => setFormData({...formData, procedimento: e.target.value})}
+                                    placeholder="Ex: Limpeza, Clareamento..."
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Data</label>
+                                    <input
+                                        type="date"
+                                        value={formData.data}
+                                        onChange={(e) => setFormData({...formData, data: e.target.value})}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Horário</label>
+                                    <select
+                                        value={formData.hora}
+                                        onChange={(e) => setFormData({...formData, hora: e.target.value})}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                    >
+                                        <option value="">Selecione</option>
+                                        {HORARIOS.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                                <select
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                >
+                                    <option value="pendente">Pendente</option>
+                                    <option value="confirmado">Confirmado</option>
+                                    <option value="bloqueio">Bloqueio</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
+                            <button onClick={onClose} className="flex-1 px-6 py-3 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-100">
+                                Cancelar
+                            </button>
+                            <button onClick={handleSave} className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700">
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Agenda = () => {
+            const [agendamentos, setAgendamentos] = useState([
+                { id: 1, paciente: 'Ana Clara', procedimento: 'Avaliação', data: '2025-11-18', hora: '09:00', status: 'confirmado' },
+                { id: 2, paciente: 'Mariana C.', procedimento: 'Limpeza', data: '2025-11-19', hora: '10:00', status: 'confirmado' },
+                { id: 3, paciente: 'Pedro H.', procedimento: 'Manutenção', data: '2025-11-17', hora: '14:00', status: 'pendente' },
+            ]);
+            const [selectedAgendamento, setSelectedAgendamento] = useState(null);
+            const [weekStart, setWeekStart] = useState(new Date());
+
+            const getWeekDays = () => {
+                const days = [];
+                const start = new Date(weekStart);
+                start.setDate(start.getDate() - start.getDay() + 1); // Segunda-feira
+
+                for (let i = 0; i < 6; i++) {
+                    const day = new Date(start);
+                    day.setDate(start.getDate() + i);
+                    days.push(day);
+                }
+                return days;
+            };
+
+            const weekDays = getWeekDays();
+
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            const getAgendamentoForSlot = (date, hora) => {
+                const dateStr = formatDate(date);
+                return agendamentos.find(a => a.data === dateStr && a.hora === hora);
+            };
+
+            const handlePreviousWeek = () => {
+                const newDate = new Date(weekStart);
+                newDate.setDate(newDate.getDate() - 7);
+                setWeekStart(newDate);
+            };
+
+            const handleNextWeek = () => {
+                const newDate = new Date(weekStart);
+                newDate.setDate(newDate.getDate() + 7);
+                setWeekStart(newDate);
+            };
+
+            const handleSlotClick = (date, hora, agendamento) => {
+                if (agendamento) {
+                    setSelectedAgendamento(agendamento);
+                } else {
+                    setSelectedAgendamento({
+                        data: formatDate(date),
+                        hora: hora,
+                        status: 'pendente'
+                    });
+                }
+            };
+
+            const handleSaveAgendamento = (updatedAgendamento) => {
+                if (updatedAgendamento.id) {
+                    setAgendamentos(prev =>
+                        prev.map(a => a.id === updatedAgendamento.id ? updatedAgendamento : a)
+                    );
+                    alert('✅ Agendamento atualizado!');
+                } else {
+                    const newAgendamento = { ...updatedAgendamento, id: Date.now() };
+                    setAgendamentos(prev => [...prev, newAgendamento]);
+                    alert('✅ Agendamento criado!');
+                }
+            };
+
+            const handleConfirmar = (agendamento) => {
+                setAgendamentos(prev =>
+                    prev.map(a =>
+                        a.id === agendamento.id ? { ...a, status: 'confirmado' } : a
+                    )
+                );
+                alert(`✅ Agendamento de ${agendamento.paciente} confirmado!`);
+            };
+
+            const getStatusColor = (status) => {
+                switch(status) {
+                    case 'confirmado': return 'bg-green-100 border-green-300 text-green-800';
+                    case 'pendente': return 'bg-amber-100 border-amber-300 text-amber-800';
+                    case 'bloqueio': return 'bg-blue-100 border-blue-300 text-blue-800';
+                    default: return 'bg-slate-100 border-slate-300';
+                }
+            };
+
+            const formatWeekRange = () => {
+                const start = weekDays[0];
+                const end = weekDays[weekDays.length - 1];
+                const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                return `${start.getDate()} - ${end.getDate()} ${monthNames[end.getMonth()]} ${end.getFullYear()}`;
+            };
+
+            return (
+                <div className="c-fade-in pb-20 md:pb-0">
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900">Agenda</h1>
+                            <p className="text-slate-600 mt-1">Visualize e gerencie seus agendamentos.</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button onClick={handlePreviousWeek} className="p-2 hover:bg-slate-100 rounded-lg">
+                                <Icon type="chevronLeft" size={20} />
+                            </button>
+                            <span className="font-bold text-slate-900 min-w-[200px] text-center">{formatWeekRange()}</span>
+                            <button onClick={handleNextWeek} className="p-2 hover:bg-slate-100 rounded-lg">
+                                <Icon type="chevronLeft" size={20} className="rotate-180" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="p-4 text-left text-xs font-bold text-slate-600 w-24">HORA</th>
+                                    {weekDays.map((day, i) => {
+                                        const isToday = formatDate(day) === formatDate(new Date());
+                                        return (
+                                            <th key={i} className={`p-4 text-center ${isToday ? 'bg-blue-50' : ''}`}>
+                                                <div className="text-xs font-bold text-slate-600">{DIAS_SEMANA[i]}</div>
+                                                <div className={`text-2xl font-bold mt-1 ${isToday ? 'text-blue-600' : 'text-slate-900'}`}>
+                                                    {day.getDate()}
+                                                </div>
+                                            </th>
+                                        );
+                                    })}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {HORARIOS.map((hora) => (
+                                    <tr key={hora} className="border-b border-slate-100">
+                                        <td className="p-4 text-sm text-slate-500 font-medium bg-slate-50">{hora}</td>
+                                        {weekDays.map((day, i) => {
+                                            const agendamento = getAgendamentoForSlot(day, hora);
+                                            return (
+                                                <td
+                                                    key={i}
+                                                    onClick={() => handleSlotClick(day, hora, agendamento)}
+                                                    className="p-2 cursor-pointer hover:bg-slate-50 transition-colors"
+                                                >
+                                                    {agendamento ? (
+                                                        <div className={`p-3 rounded-lg border-2 ${getStatusColor(agendamento.status)}`}>
+                                                            <div className="font-bold text-sm mb-1">{agendamento.paciente}</div>
+                                                            <div className="text-xs mb-2">{agendamento.procedimento}</div>
+                                                            {agendamento.status === 'pendente' && (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleConfirmar(agendamento); }}
+                                                                    className="text-xs font-bold text-amber-700 hover:text-amber-900"
+                                                                >
+                                                                    Confirmar?
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ) : null}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {selectedAgendamento && (
+                        <AgendamentoModal
+                            agendamento={selectedAgendamento}
+                            onClose={() => setSelectedAgendamento(null)}
+                            onSave={handleSaveAgendamento}
+                        />
+                    )}
+                </div>
+            );
+        };
+
         // ===== PLACEHOLDER PAGES =====
         const PlaceholderPage = ({ title, icon, color }) => (
             <div className="c-fade-in pb-20 md:pb-0">
@@ -652,7 +940,7 @@
         const menuItems = [
             { id: 'dashboard', label: 'Dashboard', icon: 'grid', component: Overview },
             { id: 'crm', label: 'CRM', icon: 'kanban', component: CRM },
-            { id: 'agenda', label: 'Agenda', icon: 'calendar', component: () => <PlaceholderPage title="Agenda" icon="calendar" color="text-green-600" /> },
+            { id: 'agenda', label: 'Agenda', icon: 'calendar', component: Agenda },
             { id: 'scripts', label: 'Scripts', icon: 'message', component: () => <PlaceholderPage title="Scripts" icon="message" color="text-purple-600" /> },
             { id: 'pacientes', label: 'Pacientes', icon: 'users', component: () => <PlaceholderPage title="Pacientes" icon="users" color="text-indigo-600" /> },
             { id: 'ai-config', label: 'Base de Conhecimento', icon: 'brain', component: () => <PlaceholderPage title="Base de Conhecimento" icon="brain" color="text-pink-600" /> },
