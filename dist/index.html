@@ -144,7 +144,7 @@
             ],
         };
 
-        const LeadCard = ({ lead, onOpenDetails }) => {
+        const LeadCard = ({ lead, onOpenDetails, onDragStart, onDragEnd }) => {
             const sourceColors = {
                 'INSTAGRAM': 'bg-pink-50 text-pink-700 border-pink-200',
                 'WHATSAPP': 'bg-green-50 text-green-700 border-green-200',
@@ -155,7 +155,7 @@
 
             const handleWhatsApp = (e) => {
                 e.stopPropagation();
-                const phone = lead.phone || '5511999999999'; // Número padrão se não tiver
+                const phone = lead.phone || '5511999999999';
                 const message = lead.procedure
                     ? `Olá ${lead.name}! Vi que você tem interesse em ${lead.procedure}. Como posso te ajudar?`
                     : `Olá ${lead.name}! Como posso te ajudar?`;
@@ -170,7 +170,12 @@
             };
 
             return (
-                <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div
+                    draggable
+                    onDragStart={(e) => onDragStart(e, lead)}
+                    onDragEnd={onDragEnd}
+                    className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-move hover:border-blue-300"
+                >
                     <div className="flex items-start justify-between mb-3">
                         <span className={`text-xs font-bold px-2 py-1 rounded border ${sourceColors[lead.source]}`}>
                             {lead.source}
@@ -222,7 +227,7 @@
             );
         };
 
-        const KanbanColumn = ({ title, count, color, leads, onOpenDetails, onDelete, isCustom }) => {
+        const KanbanColumn = ({ columnId, title, count, color, leads, onOpenDetails, onDelete, isCustom, onDrop, onDragOver, onDragStart, onDragEnd, isDraggingOver }) => {
             const colorClasses = {
                 blue: 'bg-blue-50 text-blue-700 border-blue-100',
                 amber: 'bg-amber-50 text-amber-700 border-amber-100',
@@ -232,7 +237,11 @@
             };
 
             return (
-                <div className="flex-shrink-0 w-80 group/column">
+                <div
+                    className="flex-shrink-0 w-80 group/column"
+                    onDrop={(e) => onDrop(e, columnId)}
+                    onDragOver={onDragOver}
+                >
                     <div className={`flex items-center justify-between px-4 py-3 rounded-lg border mb-4 ${colorClasses[color] || colorClasses.slate}`}>
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-sm">{title}</span>
@@ -248,10 +257,21 @@
                             </button>
                         )}
                     </div>
-                    <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar pr-2">
+                    <div className={`space-y-3 min-h-[200px] max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar pr-2 p-2 rounded-lg transition-all ${isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-400' : ''}`}>
                         {leads.map(lead => (
-                            <LeadCard key={lead.id} lead={lead} onOpenDetails={onOpenDetails} />
+                            <LeadCard
+                                key={lead.id}
+                                lead={lead}
+                                onOpenDetails={onOpenDetails}
+                                onDragStart={onDragStart}
+                                onDragEnd={onDragEnd}
+                            />
                         ))}
+                        {leads.length === 0 && (
+                            <div className="text-center py-8 text-slate-400 text-sm">
+                                Arraste leads para cá
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -411,6 +431,9 @@
             const [leads, setLeads] = useState(initialLeads);
             const [selectedLead, setSelectedLead] = useState(null);
             const [customColumns, setCustomColumns] = useState([]);
+            const [draggedLead, setDraggedLead] = useState(null);
+            const [draggedFromColumn, setDraggedFromColumn] = useState(null);
+            const [dragOverColumn, setDragOverColumn] = useState(null);
 
             const defaultColumns = [
                 { id: 'novos', title: 'Novos Leads', color: 'blue', isCustom: false },
@@ -420,6 +443,61 @@
             ];
 
             const allColumns = [...defaultColumns, ...customColumns];
+
+            // Drag and Drop handlers
+            const handleDragStart = (e, lead) => {
+                setDraggedLead(lead);
+                // Encontrar de qual coluna o lead está vindo
+                const sourceColumn = allColumns.find(col =>
+                    leads[col.id]?.some(l => l.id === lead.id)
+                );
+                setDraggedFromColumn(sourceColumn?.id);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            const handleDragEnd = () => {
+                setDraggedLead(null);
+                setDraggedFromColumn(null);
+                setDragOverColumn(null);
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            };
+
+            const handleDrop = (e, targetColumnId) => {
+                e.preventDefault();
+
+                if (!draggedLead || !draggedFromColumn) return;
+
+                // Se soltou na mesma coluna, não faz nada
+                if (draggedFromColumn === targetColumnId) {
+                    handleDragEnd();
+                    return;
+                }
+
+                // Remove o lead da coluna de origem
+                const updatedLeads = { ...leads };
+                updatedLeads[draggedFromColumn] = updatedLeads[draggedFromColumn].filter(
+                    l => l.id !== draggedLead.id
+                );
+
+                // Adiciona o lead na coluna de destino
+                if (!updatedLeads[targetColumnId]) {
+                    updatedLeads[targetColumnId] = [];
+                }
+                updatedLeads[targetColumnId] = [...updatedLeads[targetColumnId], draggedLead];
+
+                setLeads(updatedLeads);
+
+                // Mostrar feedback
+                const fromColumn = allColumns.find(c => c.id === draggedFromColumn);
+                const toColumn = allColumns.find(c => c.id === targetColumnId);
+                console.log(`✅ ${draggedLead.name} movido de "${fromColumn?.title}" para "${toColumn?.title}"`);
+
+                handleDragEnd();
+            };
 
             const handleCreateNewLead = () => {
                 setSelectedLead({
@@ -536,6 +614,7 @@
                         {allColumns.map(column => (
                             <KanbanColumn
                                 key={column.id}
+                                columnId={column.id}
                                 title={column.title}
                                 count={leads[column.id]?.length || 0}
                                 color={column.color}
@@ -543,6 +622,11 @@
                                 onOpenDetails={setSelectedLead}
                                 onDelete={column.isCustom ? () => handleDeleteColumn(column.id) : null}
                                 isCustom={column.isCustom}
+                                onDrop={handleDrop}
+                                onDragOver={handleDragOver}
+                                onDragStart={handleDragStart}
+                                onDragEnd={handleDragEnd}
+                                isDraggingOver={dragOverColumn === column.id}
                             />
                         ))}
                     </div>
